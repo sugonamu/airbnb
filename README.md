@@ -3,6 +3,8 @@
 ### Some issues that probably should be fixed
 - User uploaded photos
 - Stuff in temp.txt and temps (stuff i plan to add but lazy to fix lol)
+- Delete Product (This ones bad)
+- Non owner accounts trying to edit brings to No permission page (Gotta create those)
 
 
 Airbnb concept website
