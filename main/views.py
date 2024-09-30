@@ -14,8 +14,8 @@ from .models import Property
 def home(request):
     if not request.user.is_authenticated:
         return redirect('main:login')
-    properties = Property.objects.order_by('?')[:6]  # Featured properties
-    user_properties = request.user.properties.all()  # User's properties
+    properties = Property.objects.order_by('?')[:6]
+    user_properties = request.user.properties.all()  
     return render(request, 'home.html', {
         'properties': properties,
         'user_properties': user_properties,
@@ -25,7 +25,7 @@ def home(request):
 
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)  # Pass request and data
+        form = AuthenticationForm(request, data=request.POST) 
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
@@ -33,12 +33,12 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 response = redirect('main:home')
-                response.set_cookie('last_login', str(datetime.datetime.now()))  # Optionally set last_login cookie
+                response.set_cookie('last_login', str(datetime.datetime.now())) 
                 return response
             else:
                 messages.error(request, "Invalid username or password.")
     else:
-        form = AuthenticationForm()  # Create a new instance of the form
+        form = AuthenticationForm() 
 
     return render(request, 'login.html', {'form': form})
 
@@ -73,9 +73,9 @@ def add_property(request):
     if request.method == "POST":
         form = PropertyForm(request.POST, request.FILES)
         if form.is_valid():
-            property_instance = form.save(commit=False)  # Save but don't commit yet
-            property_instance.host = request.user  # Set the user as the host
-            property_instance.save()  # Now save the property
+            property_instance = form.save(commit=False)  
+            property_instance.host = request.user  
+            property_instance.save() 
             return redirect('main:home')  
     else:
         form = PropertyForm()
@@ -83,27 +83,24 @@ def add_property(request):
     
 @login_required
 def edit_property(request, property_id):
-    property_instance = get_object_or_404(Property, id=property_id, host=request.user)  # Ensure only the host can edit
+    property_instance = get_object_or_404(Property, id=property_id, host=request.user) 
 
     if request.method == "POST":
         form = PropertyForm(request.POST, request.FILES, instance=property_instance)
         if form.is_valid():
             form.save()
             messages.success(request, "Property updated successfully.")
-            return redirect('main:my_properties')  # Redirect to a user-specific properties page
+            return redirect('main:my_properties')  
     else:
         form = PropertyForm(instance=property_instance)
 
     return render(request, 'editproperty.html', {'form': form})
 
 
-@login_required
-def delete_property(request, property_id):
-    property_instance = get_object_or_404(Property, id=property_id, host=request.user)  # Ensure only the host can delete
+def delete_property(request, product_id):
+    property_instance = get_object_or_404(Property, id=product_id)  # Use id for UUID
     property_instance.delete()
-    messages.success(request, "Property deleted successfully.")
-    return redirect('main:my_properties')  # Redirect to a user-specific properties page
-
+    return HttpResponseRedirect(reverse('main:home'))
 
 def property_list(request):
     properties = request.user.properties.all() 
