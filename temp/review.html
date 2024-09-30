@@ -3,6 +3,8 @@
 {% block title %}Leave a Review{% endblock %}
 
 {% block content %}
+{% include 'navbar.html' %}
+{% load static %}
 <h1>Leave a Review for {{ reservation.property.title }}</h1>
 <form method="POST">
     {% csrf_token %}

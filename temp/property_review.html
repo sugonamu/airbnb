@@ -3,6 +3,8 @@
 {% block title %}Reviews for {{ property.title }}{% endblock %}
 
 {% block content %}
+{% include 'navbar.html' %}
+{% load static %}
 <h1>Reviews for {{ property.title }}</h1>
 <ul>
     {% for review in reviews %}

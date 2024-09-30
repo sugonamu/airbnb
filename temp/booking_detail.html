@@ -3,12 +3,14 @@
 {% block title %}Reservation Details{% endblock %}
 
 {% block content %}
+{% include 'navbar.html' %}
+{% load static %}
 <h1>Reservation Details</h1>
 <p>Property: {{ reservation.property.title }}</p>
 <p>Check-in: {{ reservation.check_in }}</p>
 <p>Check-out: {{ reservation.check_out }}</p>
 <p>Total price: ${{ reservation.total_price }}</p>
 {% if not reservation.review %}
-    <a href="{% url 'leave_review' reservation.id %}">Leave a review</a>
+    <a href="{% url 'main:review' reservation.id %}">Leave a review</a>
 {% endif %}
 {% endblock %}

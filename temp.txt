@@ -1,0 +1,57 @@
+@login_required
+def make_reservation(request, property_id):
+    property = get_object_or_404(Property, id=property_id)
+    if request.method == 'POST':
+        form = ReservationForm(request.POST)
+        if form.is_valid():
+            reservation = form.save(commit=False)
+            reservation.guest = request.user
+            reservation.property = property
+            reservation.total_price = (reservation.check_out - reservation.check_in).days * property.price_per_night
+            reservation.save()
+            messages.success(request, "Reservation successful!")
+            return redirect('reservation_detail', reservation_id=reservation.id)
+    else:
+        form = ReservationForm()
+    return render(request, 'make_reservation.html', {'form': form, 'property': property})
+
+
+@login_required
+def reservation_detail(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+    return render(request, 'reservation_detail.html', {'reservation': reservation})
+
+
+@login_required
+def leave_review(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.reservation = reservation
+            review.save()
+            messages.success(request, "Review submitted successfully!")
+            return redirect('property_detail', property_id=reservation.property.id)
+    else:
+        form = ReviewForm()
+    return render(request, 'leave_review.html', {'form': form, 'reservation': reservation})
+
+
+#def property_reviews(request, property_id):
+    property = get_object_or_404(Property, id=property_id)
+    reviews = Review.objects.filter(reservation__property=property)
+    return render(request, 'property_reviews.html', {'property': property, 'reviews': reviews})
+
+
+
+
+
+--------------------
+
+    path('properties/<int:property_id>/reserve/', views.make_reservation, name='make_reservation'), 
+    path('reservations/<int:reservation_id>/', views.reservation_detail, name='reservation_detail'),
+    path('reservations/<int:reservation_id>/review/', views.leave_review, name='leave_review'),
+    path('properties/<int:property_id>/reviews/', views.property_reviews, name='property_reviews')
+    path('properties/<uuid:property_id>/', views.property_detail, name='property_detail')
+

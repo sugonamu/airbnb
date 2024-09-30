@@ -1,104 +1,89 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, reverse
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .forms import LoginForm, RegistrationForm, ReservationForm, ReviewForm
-from .models import Property, Reservation, Review  # Import your Property, Reservation, and Review models
+from django.http import HttpResponse,HttpResponseRedirect, JsonResponse
+from .forms import  PropertyForm
+from .models import Property
 
-# Home page view
+
 def home(request):
-    properties = Property.objects.filter(is_available=True)[:6]  # Limit to 6 featured properties
+    properties = Property.objects.order_by('?')[:6]
     return render(request, 'home.html', {'properties': properties})
 
-# Property list view
-def property_list(request):
-    properties = Property.objects.filter(is_available=True)
-    return render(request, 'property_list.html', {'properties': properties})
-
-# Property detail view
-def property_detail(request, property_id):
-    property = get_object_or_404(Property, id=property_id)
-    images = property.images.all()  # Assuming a ForeignKey or related name for images
-    amenities = property.amenities.all()  # Assuming a ManyToMany or related name for amenities
-    return render(request, 'property_detail.html', {
-        'property': property,
-        'images': images,
-        'amenities': amenities,
-    })
-
-# Login view
-def login_view(request):
+def login(request):
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = AuthenticationForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('home')  # Redirect to home page after login
+                return redirect('main:home')
             else:
                 messages.error(request, "Invalid username or password.")
     else:
-        form = LoginForm()
+        form = AuthenticationForm
     return render(request, 'login.html', {'form': form})
 
-# Registration view
-def register_view(request):
+def register(request):
     if request.method == 'POST':
-        form = RegistrationForm(request.POST)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])  # Set hashed password
+            user.set_password(form.cleaned_data['password1'])
             user.save()
             messages.success(request, "Registration successful. You can now log in.")
-            return redirect('login')
+            return redirect('main:login')
     else:
-        form = RegistrationForm()
+        form = UserCreationForm()
     return render(request, 'register.html', {'form': form})
 
-# Reservation view
-@login_required
-def make_reservation(request, property_id):
-    property = get_object_or_404(Property, id=property_id)
-    if request.method == 'POST':
-        form = ReservationForm(request.POST)
+def logout(request):
+    logout(request)
+    response = HttpResponseRedirect(reverse('main:login'))
+    response.delete_cookie('last_login')
+    return response
+
+def error(request):
+    return render(request, 'error.html') 
+
+def property_detail(request, property_id):
+    property_instance = get_object_or_404(Property, id=property_id)
+    return render(request, 'property_detail.html', {'property': property_instance})
+
+def add_property(request):
+    if request.method == "POST":
+        form = PropertyForm(request.POST, request.FILES)
         if form.is_valid():
-            reservation = form.save(commit=False)
-            reservation.guest = request.user
-            reservation.property = property
-            reservation.total_price = (reservation.check_out - reservation.check_in).days * property.price_per_night
-            reservation.save()
-            messages.success(request, "Reservation successful!")
-            return redirect('reservation_detail', reservation_id=reservation.id)
+            property = form.save(commit=False)
+            property.host = request.user 
+            property.save()
+            return redirect('main:home')  
     else:
-        form = ReservationForm()
-    return render(request, 'make_reservation.html', {'form': form, 'property': property})
+        form = PropertyForm()
+    return render(request, 'addproperty.html', {'form': form})
+    
+def edit_property(request, product_id):
+    product = Property.objects.get(pk=product_id)
 
-# View to see reservation details
-@login_required
-def reservation_detail(request, reservation_id):
-    reservation = get_object_or_404(Reservation, id=reservation_id)
-    return render(request, 'reservation_detail.html', {'reservation': reservation})
+    form = PropertyForm(request.POST or None, instance=product)
 
-# View to leave a review for a property (linked to a reservation)
-@login_required
-def leave_review(request, reservation_id):
-    reservation = get_object_or_404(Reservation, id=reservation_id)
-    if request.method == 'POST':
-        form = ReviewForm(request.POST)
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.reservation = reservation
-            review.save()
-            messages.success(request, "Review submitted successfully!")
-            return redirect('property_detail', property_id=reservation.property.id)
-    else:
-        form = ReviewForm()
-    return render(request, 'leave_review.html', {'form': form, 'reservation': reservation})
+    if form.is_valid() and request.method == "POST":
+        form.save()
+        return HttpResponseRedirect(reverse('main:home'))
 
-# View to see all reviews for a property
-def property_reviews(request, property_id):
-    property = get_object_or_404(Property, id=property_id)
-    reviews = Review.objects.filter(reservation__property=property)
-    return render(request, 'property_reviews.html', {'property': property, 'reviews': reviews})
+    context = {'form': form}
+    return render(request, "editproduct.html", context)
+
+def delete_property(request, product_id):
+    property = Property.objects.get(pk=product_id)
+    property.delete()
+    return HttpResponseRedirect(reverse('main:home'))
+
+def property_list(request):
+    properties = Property.objects.filter(is_available=True)
+    return render(request, 'property_list.html', {'properties': properties})
+

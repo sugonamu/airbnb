@@ -1,45 +1,51 @@
 from django import forms
-from .models import Reservation, Review  # Import your Reservation and Review models
+from .models import Property
 
-class ReservationForm(forms.ModelForm):
+class PropertyForm(forms.ModelForm):
     class Meta:
-        model = Reservation
-        fields = ['check_in', 'check_out', 'number_of_guests']  # Adjust fields as needed
+        model = Property
+        fields = [
+            'title',
+            'description',
+            'price_per_night',
+            'address',
+            'number_of_guests',
+            'number_of_bedrooms',
+            'number_of_bathrooms',
+            'is_available'
+        ]
 
         widgets = {
-            'check_in': forms.DateInput(attrs={'type': 'date'}),
-            'check_out': forms.DateInput(attrs={'type': 'date'}),
-            'number_of_guests': forms.NumberInput(attrs={'min': 1}),
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Property Title'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Property Description'}),
+            'price_per_night': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Price per Night'}),
+            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address'}),
+            'number_of_guests': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Number of Guests'}),
+            'number_of_bedrooms': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Number of Bedrooms'}),
+            'number_of_bathrooms': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Number of Bathrooms'}),
+            'is_available': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        check_in = cleaned_data.get('check_in')
-        check_out = cleaned_data.get('check_out')
+    def clean_price_per_night(self):
+        price = self.cleaned_data.get('price_per_night')
+        if price <= 0:
+            raise forms.ValidationError("Price must be greater than zero.")
+        return price
 
-        if check_in and check_out and check_in >= check_out:
-            raise forms.ValidationError("Check-out date must be after check-in date.")
+    def clean_number_of_guests(self):
+        guests = self.cleaned_data.get('number_of_guests')
+        if guests <= 0:
+            raise forms.ValidationError("Number of guests must be greater than zero.")
+        return guests
 
-        return cleaned_data
+    def clean_number_of_bedrooms(self):
+        bedrooms = self.cleaned_data.get('number_of_bedrooms')
+        if bedrooms < 0:
+            raise forms.ValidationError("Number of bedrooms cannot be negative.")
+        return bedrooms
 
-class ReviewForm(forms.ModelForm):
-    class Meta:
-        model = Review
-        fields = ['rating', 'comment']  # Adjust fields as needed
-
-        widgets = {
-            'rating': forms.Select(choices=[
-                (1, '1 Star'), 
-                (2, '2 Stars'), 
-                (3, '3 Stars'), 
-                (4, '4 Stars'), 
-                (5, '5 Stars')
-            ]),
-            'comment': forms.Textarea(attrs={'rows': 4}),
-        }
-
-    def clean_comment(self):
-        comment = self.cleaned_data.get('comment')
-        if not comment:
-            raise forms.ValidationError("Comment cannot be empty.")
-        return comment
+    def clean_number_of_bathrooms(self):
+        bathrooms = self.cleaned_data.get('number_of_bathrooms')
+        if bathrooms < 0:
+            raise forms.ValidationError("Number of bathrooms cannot be negative.")
+        return bathrooms

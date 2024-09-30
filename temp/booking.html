@@ -3,6 +3,8 @@
 {% block title %}Make Reservation{% endblock %}
 
 {% block content %}
+{% include 'navbar.html' %}
+{% load static %}
 <h1>Book {{ property.title }}</h1>
 <form method="POST">
     {% csrf_token %}
