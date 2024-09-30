@@ -13,6 +13,7 @@ urlpatterns = [
     path('add_property/', views.add_property, name='add_property'),
     path('properties/<uuid:property_id>/', views.property_detail, name='property_detail'),
     path('edit_property/<uuid:property_id>/', views.edit_property, name='edit_property'),
-    path('property/delete/<uuid:product_id>/', views.delete_property, name='delete_property')
+    path('property/delete/<uuid:product_id>/', views.delete_property, name='delete_property'),
+    path('users/', views.user_list, name='user_list')
 ]
 

@@ -5,10 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
-from django.http import HttpResponse,HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse,HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.urls import reverse
 from .forms import  PropertyForm
-from .models import Property
+from .models import Property, User
 
 
 def home(request):
@@ -106,3 +106,11 @@ def property_list(request):
     properties = request.user.properties.all() 
     return render(request, 'property_list.html', {'properties': properties})
 
+@login_required
+def user_list(request):
+    # Replace 'your_username' with your actual username
+    if request.user.username != 'fact':
+        return HttpResponseForbidden("You are not allowed to view this page.")
+    
+    users = User.objects.all()
+    return render(request, 'user_list.html', {'users': users})
