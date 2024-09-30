@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-19s25zsqqh-zdtko*vd2o=xz3#1ux&tfui7*1f2n)&)o^0a*nq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1","william-samuel-airbnb.pbp.cs.ui.ac.id"]
 
 CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1","http://pbp.cs.ui.ac.id/william.samuel/airbnb", "https://pbp.cs.ui.ac.id/william.samuel/airbnb"]
 
