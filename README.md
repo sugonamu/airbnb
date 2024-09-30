@@ -5,6 +5,7 @@
 - Stuff in temp.txt and temps (stuff i plan to add but lazy to fix lol)
 - Non owner accounts trying to edit brings to No permission page (Gotta create those)
 - JSON and XML Stuff
+- Property Card in Home Page are NOT interactive, only Property card in Properties
 
 
 Airbnb concept website
