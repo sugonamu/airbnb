@@ -12,6 +12,8 @@ from .models import Property
 
 
 def home(request):
+    if not request.user.is_authenticated:
+        return redirect('main:login')
     properties = Property.objects.order_by('?')[:6]  # Featured properties
     user_properties = request.user.properties.all()  # User's properties
     return render(request, 'home.html', {
