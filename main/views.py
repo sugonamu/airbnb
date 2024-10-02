@@ -90,7 +90,7 @@ def edit_property(request, property_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Property updated successfully.")
-            return redirect('main:my_properties')  
+            return redirect('main:property_list')  
     else:
         form = PropertyForm(instance=property_instance)
 
