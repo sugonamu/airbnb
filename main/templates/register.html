@@ -29,12 +29,24 @@
           {% if field.help_text %}
             <p class="mt-1 text-xs text-gray-500">{{ field.help_text }}</p>
           {% endif %}
-          {% for error in field.errors %}
+          {% for error in field.errors %} 
             <p class="mt-1 text-xs text-red-600">{{ error }}</p>
           {% endfor %}
         </div>
       {% endfor %}
-    
+      
+      <!-- Role selection for Guest or Host -->
+      <div class="mb-4">
+        <label for="role" class="block text-sm font-medium text-gray-700">Register as:</label>
+        <select name="role" id="role" class="w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          <option value="guest">Guest</option>
+          <option value="host">Host</option>
+        </select>
+        {% if form.role.errors %}
+          <p class="mt-1 text-xs text-red-600">{{ form.role.errors }}</p>
+        {% endif %}
+      </div>
+
       <div>
         <input type="submit" name="submit" value="Register" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" />
       </div>
